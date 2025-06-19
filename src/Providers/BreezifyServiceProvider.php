@@ -30,6 +30,12 @@ class BreezifyServiceProvider extends ServiceProvider
                 // Controller (Now correctly publishes only the simple ProfileController)
                 __DIR__.'/../../stubs/App/Http/Controllers/ProfileController.php' => app_path('Http/Controllers/ProfileController.php'),
 
+                // App Layout
+                __DIR__.'/../../stubs/App/View/Components/AppLayout.php' => app_path('View/Components/AppLayout.php'),
+                
+                //This is the guest layout
+                __DIR__.'/../../stubs/App/View/Components/GuestLayout.php' => app_path('View/Components/GuestLayout.php'),
+
                 // Routes (Publishes the dedicated auth.php file)
                 __DIR__.'/../../stubs/routes/auth.php' => base_path('routes/auth.php'),
                 

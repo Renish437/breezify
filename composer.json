@@ -10,7 +10,9 @@
     },
     "authors": [
         {
-            "name": "Renish Siwakoti"
+            "name": "Renish Siwakoti",
+            "email": "renishsiwakoti437@gmail.com", 
+            "role": "Owner"
         }
     ],
     "minimum-stability": "dev",

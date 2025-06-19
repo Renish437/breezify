@@ -1,224 +1,121 @@
-🌟 Breezify
+# Breezify 🌀
 
-## A Laravel package that makes user authentication simple and beautiful.
+**Breezify** is a Laravel authentication scaffolding package that combines the clean UI approach of **Laravel Breeze** with the powerful backend features of **Laravel Fortify**. It offers out-of-the-box authentication views, profile management, email verification, and two-factor authentication — all ready to go.
 
-Breezify combines Laravel Fortify (for backend security) with Laravel Breeze (for beautiful UI using Blade and TailwindCSS).
-Get a complete login + profile management system up and running in minutes! 🚀
+> Built and maintained by [Renish Siwakoti](https://github.com/renishsiwakoti)
 
-Latest Version
-Total Downloads
-License
-✨ Features
+---
 
-    🔐 Secure Authentication (Fortify): Login, register, password reset, email verification, 2FA, profile updates, account deletion
+## 📦 Installation
 
-    💨 Clean UI (Breeze): Tailwind-styled Blade templates
+### 1. Require the Package via Composer
 
-    🛣️ Default Routes: /login, /register, /dashboard, /profile, etc.
 
-    ⚙️ One-Command Setup
+    composer require codesren/breezify:dev-main
 
-    🎨 Customizable: Views, routes, and controllers
+2. Publish the Breezify Assets
 
-    🪶 Lightweight: Simple but powerful
+    php artisan vendor:publish --tag=breezify or php artisan install:breezify blade
 
-🛠 Requirements
+This will publish:
 
-    PHP >= 8.0
+    Views (resources/views/auth)
 
-    Laravel >= 8.0
+    Controllers
 
-    Laravel Fortify >= 1.4
+    Layouts (AppLayout, GuestLayout)
 
-    Laravel Breeze >= 1.0
+    Routes (routes/auth.php)
 
-    Node.js & npm (for compiling assets)
+    Tailwind / Vite configs
 
-🚀 Installation – 5 Simple Steps
-✅ Step 1: Install Breezify
+    FortifyServiceProvider
 
-Open your terminal and run:
+    JS / CSS scaffolding
 
-composer require codesren/breezify
+3. Register the Fortify Service Provider
 
-    🧪 For local development, update your composer.json:
+Ensure the following is added to config/app.php:
 
-{
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../path/to/codesren-breezify"
-        }
-    ],
-    "require": {
-        "codesren/breezify": "*"
-    }
-}
+    App\Providers\FortifyServiceProvider::class,
 
-Then run:
+⚙️ Configuration
+Enable Fortify Views
 
-    composer require codesren/breezify
+In config/fortify.php:
 
-✅ Step 2: Run Breezify Installer
+    'views' => true,
 
-This sets up Breeze UI, Fortify config, and custom routes:
-
-    php artisan breezify:install blade
-
-✔️ What it does:
-
-    Installs Blade + Tailwind views
-
-    Sets up Fortify authentication
-
-    Adds /dashboard and /profile
-
-    Adds Fortify features and migrations
-
-    Appends auth.php to routes/web.php
-
-    Currently supports only the Blade stack. Livewire/Inertia may be added later!
-
-✅ Step 3: Compile Assets (Tailwind + JS)
-
-    npm install
-    npm run build
-
-This uses Vite to bundle your TailwindCSS and JavaScript.
-✅ Step 4: Run Migrations
-
-    php artisan migrate
-
-Creates necessary tables (users, password_resets, etc.).
-✅ Step 5: Start Laravel Development Server
-
-    php artisan serve
-
-Visit: http://localhost:8000
-You should now see the login screen with Breezify in action! ✨
-🎯 Routes & Usage
-🔐 Auth Routes (Fortify-powered)
-
-    /login
-
-    /register
-
-    /password/reset
-
-    /email/verify
-
-    /two-factor-challenge
-
-👤 User Pages (Custom UI)
-
-    /dashboard – User dashboard
-
-    /profile – Edit profile (update name/email or delete account)
-
-✏️ Customization
-
-Make it your own:
-
-    Views:
-    resources/views/dashboard.blade.php, auth/login.blade.php, etc.
-
-    Routes:
-    routes/auth.php
-
-    Styles/Scripts:
-    resources/css/app.css, resources/js/app.js
-
-Re-publish assets anytime:
-
-php artisan vendor:publish --tag=breezify
-
-🧪 Test Checklist
-
-    Check Routes:
-
-php artisan route:list
-
-Make sure you see /login, /register, /dashboard, /profile, etc.
-
-    Register a User:
-
-        Go to /register
-
-        Log in via /login
-
-        You should be redirected to /dashboard
-
-    Update Profile:
-
-        Visit /profile
-
-        Try changing your name or email
-
-        Use the delete option to remove account
-
-    Verify Styles:
-
-        Open dev tools (F12)
-
-        Check Tailwind is working
-
-        Console should be clean (no JS errors)
-
-⚙️ Optional Config: Fortify Features
-
-Edit config/fortify.php to toggle features:
+Enable Features
 
     'features' => [
     Features::registration(),
     Features::resetPasswords(),
-    // Features::emailVerification(),
+    Features::emailVerification(),
     Features::updateProfileInformation(),
     Features::updatePasswords(),
-    Features::twoFactorAuthentication(),
+    Features::twoFactorAuthentication([
+        'confirmPassword' => true,
+    ]),
     ],
 
-Comment out anything you don’t want.
-➕ Extend It Further
+📁 Routes
 
-Add new routes in routes/auth.php
-Add custom controllers in app/Http/Controllers
-Extend Fortify actions in app/Actions/Fortify/
-Create additional views in resources/views
+Make sure to include the published route file in routes/web.php:
 
-🤝 Contribute
+require __DIR__.'/auth.php';
 
-We welcome your ideas and improvements!
+🧑‍💻 User Model Setup
 
-    git checkout -b feature/my-feature
-    git commit -m "Add amazing feature"
-    git push origin feature/my-feature
+Ensure your User model uses necessary traits and interfaces:
 
-Then open a Pull Request on GitHub 🚀
-🐞 Need Support?
+    use Laravel\Fortify\TwoFactorAuthenticatable;
+    use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-Open an issue with:
+    class User extends Authenticatable implements MustVerifyEmail
+    {
+    use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
-    Problem description
+    protected $fillable = ['name', 'email', 'password'];
+    }
 
-    Steps to reproduce
+🛡️ Features Included
 
-    Laravel, PHP, and Breezify version
+✅ Registration & Login
+✅ Email Verification
+✅ Forgot & Reset Password
+✅ Profile Update
+✅ Password Confirmation
+✅ Two-Factor Authentication
+✅ Tailwind CSS UI
+✅ Vite + PostCSS Ready
+🚀 Build Frontend Assets
 
-👉 GitHub Issues Page
-📜 License
+After publishing:
 
-Breezify is open-sourced under the MIT license.
-🙏 Credits
+    npm install
+    npm run dev
 
-    Author: Renish Siwakoti
+    Ensure you have Node.js, npm, and Vite configured.
 
-    Powered by: Laravel Fortify + Laravel Breeze
+🧪 Run Migrations
 
-    Inspired by: The amazing Laravel community ❤️
+    php artisan migrate
 
-🎉 Get Started Now
+🤝 Contributing
 
-composer require codesren/breezify
-php artisan breezify:install blade
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+📧 Support
 
-Happy coding! 😄
+    Email: renishsiwakoti437@gmail.com
+
+    Issues: GitHub Issues
+
+📄 License
+
+The MIT License (MIT). See LICENSE for details.
+
+
+
+
+
