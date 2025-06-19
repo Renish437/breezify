@@ -57,13 +57,13 @@ composer require codesren/breezify
 
 Then run:
 
-composer require codesren/breezify
+    composer require codesren/breezify
 
 ✅ Step 2: Run Breezify Installer
 
 This sets up Breeze UI, Fortify config, and custom routes:
 
-php artisan breezify:install blade
+    php artisan breezify:install blade
 
 ✔️ What it does:
 
@@ -81,18 +81,18 @@ php artisan breezify:install blade
 
 ✅ Step 3: Compile Assets (Tailwind + JS)
 
-npm install
-npm run build
+    npm install
+    npm run build
 
 This uses Vite to bundle your TailwindCSS and JavaScript.
 ✅ Step 4: Run Migrations
 
-php artisan migrate
+    php artisan migrate
 
 Creates necessary tables (users, password_resets, etc.).
 ✅ Step 5: Start Laravel Development Server
 
-php artisan serve
+    php artisan serve
 
 Visit: http://localhost:8000
 You should now see the login screen with Breezify in action! ✨
