@@ -34,7 +34,8 @@ class BreezifyServiceProvider extends ServiceProvider
         ], 'breezify');
 
         // Load custom routes
-        $this->loadRoutesFrom(__DIR__.'/../../routes/auth.php');
+        $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
+      
 
         // Load views
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'breezify');
