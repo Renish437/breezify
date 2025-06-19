@@ -20,19 +20,17 @@ class BreezifyServiceProvider extends ServiceProvider
             ]);
 
             $this->publishes([
-                // Publish the FortifyServiceProvider stub
+                // Provider
                 __DIR__.'/../../stubs/App/Providers/FortifyServiceProvider.php' => app_path('Providers/FortifyServiceProvider.php'),
+                
+                // Controller (Now correctly publishes only the simple ProfileController)
+                __DIR__.'/../../stubs/App/Http/Controllers/ProfileController.php' => app_path('Http/Controllers/ProfileController.php'),
 
-                // Publish Controllers
-                __DIR__.'/../../stubs/App/Http/Controllers' => app_path('Http/Controllers'),
-
-                // Publish Auth routes
+                // Routes (Publishes the dedicated auth.php file)
                 __DIR__.'/../../stubs/routes/auth.php' => base_path('routes/auth.php'),
                 
-                // Publish Views
+                // Views and Assets
                 __DIR__.'/../../stubs/resources/views' => resource_path('views'),
-                
-                // Publish frontend assets
                 __DIR__.'/../../stubs/resources/css' => resource_path('css'),
                 __DIR__.'/../../stubs/resources/js' => resource_path('js'),
                 __DIR__.'/../../stubs/tailwind.config.js' => base_path('tailwind.config.js'),

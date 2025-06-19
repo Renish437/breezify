@@ -102,17 +102,17 @@ PHP;
     /**
      * Appends required routes to the application's web routes file.
      */
-    protected function appendRoutes()
-    {
-        $this->info('Adding dashboard and profile routes...');
-        $routesContent = File::get(__DIR__.'/../../stubs/routes/web.php');
-        
-        if (!Str::contains(File::get(base_path('routes/web.php')), 'ProfileController')) {
-            File::append(base_path('routes/web.php'), $routesContent);
-        } else {
-            $this->line('Dashboard/Profile routes already exist. Skipping.');
-        }
+  protected function appendRoutes()
+{
+    $this->info('Adding auth routes...');
+    $authRoutes = "require __DIR__.'/auth.php';";
+    
+    if (!Str::contains(File::get(base_path('routes/web.php')), $authRoutes)) {
+        File::append(base_path('routes/web.php'), "\n".$authRoutes);
+    } else {
+        $this->line('Auth routes already included. Skipping.');
     }
+}
 
     /**
      * Installs and builds the frontend assets.

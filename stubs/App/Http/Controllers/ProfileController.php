@@ -1,10 +1,10 @@
 <?php
 
-namespace CodesRen\Breezify\Http\Controllers;
+namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+
 use Illuminate\View\View;
-use Illuminate\Routing\Controller;
 
 class ProfileController extends Controller
 {
@@ -13,8 +13,11 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('breezify::profile.edit', [
+        return view('profile.edit', [
             'user' => $request->user(),
         ]);
     }
+
+
+   
 }
