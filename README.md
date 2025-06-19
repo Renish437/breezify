@@ -1,27 +1,26 @@
-<div align="center">
 🌟 Breezify
 
 A Laravel package that makes user authentication simple and beautiful.
-<p>Breezify combines Laravel Fortify for secure login features with Laravel Breeze for a sleek, modern look using Blade and TailwindCSS. 🚀 Set up a complete login system with a polished interface in minutes!</p>
-<p>
-<a href="https://packagist.org/packages/codesren/breezify"><img src="https://img.shields.io/packagist/v/codesren/breezify.svg?style=flat-square" alt="Latest Version on Packagist"></a>
-<a href="https://packagist.org/packages/codesren/breezify"><img src="https://img.shields.io/packagist/dt/codesren/breezify.svg?style=flat-square" alt="Total Downloads"></a>
-<a href="https://github.com/codesren/breezify/blob/main/LICENSE.md"><img src="https://img.shields.io/packagist/l/codesren/breezify.svg?style=flat-square" alt="License"></a>
-</p>
-</div>
 
-Perfect for new or existing Laravel projects, Breezify gets you started with one command, giving you login, registration, profile management, and more—all styled elegantly. 😊
+Breezify combines Laravel Fortify for secure login features with Laravel Breeze for a sleek, modern look using Blade and TailwindCSS. 🚀
+Set up a complete login system with a polished interface in minutes!
+
+Latest Version on Packagist
+Total Downloads
+License
+
+Perfect for new or existing Laravel projects, Breezify gets you started with one command—giving you login, registration, profile management, and more—all styled elegantly. 😊
 ✨ Key Features
 
-    Secure Authentication: Login, registration, password reset, email verification, two-factor authentication, profile updates, and account deletion.
+    Secure Authentication: Login, registration, password reset, email verification, two-factor authentication, profile updates, and account deletion
 
-    Modern UI: Clean, responsive pages styled with TailwindCSS.
+    Modern UI: Clean, responsive pages styled with TailwindCSS
 
-    Main Pages: /dashboard user home page and /profile for editing.
+    Main Pages: /dashboard (user homepage) and /profile (edit)
 
-    One-Command Setup: Install everything with a single Artisan command.
+    One-Command Setup: Install everything with a single Artisan command
 
-    Customizable: Easily tweak the design or add new features.
+    Customizable: Easily tweak the design or add new features
 
 🛠️ Requirements
 
@@ -35,207 +34,130 @@ Before starting, ensure your project has:
 
     Laravel Breeze 1.0 or higher
 
-    Node.js and npm (for styling)
+    Node.js and npm (for styling and scripts)
 
 🚀 Get Started in 5 Easy Steps
-
-Follow these steps to add Breezify to your Laravel project. You’ll have a fully working authentication system in no time! 🎉
 Step 1: Install Breezify
 
-In your Laravel project folder, run this command to add Breezify:
-Generated bash
+In your Laravel project folder, run:
 
-      
 composer require codesren/breezify
 
-    
+Local Development (Optional):
 
-IGNORE_WHEN_COPYING_START
-Use code with caution. Bash
-IGNORE_WHEN_COPYING_END
+If developing locally, add this to your composer.json:
 
-    Local Development: If you’re working on Breezify locally, add this to your project’s composer.json:
-    Generated json
-
-          
-    {
-        "repositories": [
-            {
-                "type": "path",
-                "url": "../path/to/codesren-breezify"
-            }
-        ],
-        "require": {
-            "codesren/breezify": "*"
+{
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../path/to/codesren-breezify"
         }
+    ],
+    "require": {
+        "codesren/breezify": "*"
     }
+}
 
-        
+Then run:
 
-    IGNORE_WHEN_COPYING_START
-
-    Use code with caution. Json
-    IGNORE_WHEN_COPYING_END
-
-    Then run composer require codesren/breezify.
+composer require codesren/breezify
 
 Step 2: Run the Setup Command
 
-Install Breezify’s files (pages, routes, and more) with this command:
-Generated bash
-
-      
 php artisan breezify:install blade
-
-    
-
-IGNORE_WHEN_COPYING_START
-Use code with caution. Bash
-IGNORE_WHEN_COPYING_END
 
 This will:
 
-    Add Breeze’s styled pages and TailwindCSS.
+    Add Breeze’s styled pages and TailwindCSS
 
-    Set up Fortify’s secure login features.
+    Set up Fortify’s secure backend
 
-    Create routes for /dashboard and /profile.
+    Create routes for /dashboard and /profile
 
-    Add database tables and routes to your project.
+    Add migrations, controllers, and views
 
-    Note: Only the blade style is supported now. More options may come later! 🌈
+    Note: Currently supports only the blade stack. More stacks may come soon! 🌈
 
 Step 3: Build the Styles
 
-Set up and compile the styling files to make your pages look great:
-Generated bash
-
-      
 npm install
 npm run build
 
-    
-
-IGNORE_WHEN_COPYING_START
-Use code with caution. Bash
-IGNORE_WHEN_COPYING_END
-
-This prepares TailwindCSS and JavaScript for a modern look.
+This compiles TailwindCSS and JavaScript assets using Vite.
 Step 4: Set Up the Database
 
-Create the necessary database tables (like users):
-Generated bash
-
-      
 php artisan migrate
 
-    
+Step 5: Start Your Laravel Project
 
-IGNORE_WHEN_COPYING_START
-Use code with caution. Bash
-IGNORE_WHEN_COPYING_END
-Step 5: Start Your Project
-
-Launch your Laravel server to see Breezify in action:
-Generated bash
-
-      
 php artisan serve
 
-    
-
-IGNORE_WHEN_COPYING_START
-Use code with caution. Bash
-IGNORE_WHEN_COPYING_END
-
-Open http://localhost:8000 in your browser to explore your new login system! ✨
+Visit http://localhost:8000 to view your app. 🎉
 🎯 Using Breezify
+🔐 Authentication Pages
 
-Once installed, Breezify gives you a ready-to-use authentication system.
-🔐 Login Pages
+    /login — Login
 
-    Login: /login
+    /register — Register
 
-    Register: /register
+    /password/reset — Reset password
 
-    Password Reset: /password/reset
+    /email/verify — Email verification
 
-    Email Verification: /email/verify
-
-    Two-Factor Authentication: /two-factor-challenge
+    /two-factor-challenge — Two-factor auth
 
 👤 User Pages
 
-    Dashboard: /dashboard (your home page)
+    /dashboard — User homepage
 
-    Profile: /profile (edit your name, email, or delete your account)
+    /profile — Edit name/email, delete account
 
 ✂️ Customize It
 
-Want to make it your own? You can change:
+You can modify:
 
-    Pages: Edit files in resources/views/ (e.g., dashboard.blade.php or auth/login.blade.php).
+    Views:
+    Edit files in resources/views/ (e.g., dashboard.blade.php, auth/login.blade.php)
 
-    Routes: Update routes/auth.php to add or change links.
+    Routes:
+    Update routes/auth.php
 
-    Styles: Modify resources/css/app.css or resources/js/app.js for custom designs.
+    Styles and Scripts:
+    Modify resources/css/app.css or resources/js/app.js
 
-To publish and update files later, run:
-Generated bash
+To republish Breezify's assets:
 
-      
 php artisan vendor:publish --tag=breezify
 
-    
-
-IGNORE_WHEN_COPYING_START
-Use code with caution. Bash
-IGNORE_WHEN_COPYING_END
 🧪 Test Your Setup
+1. View Available Routes:
 
-Make sure everything works with these quick checks:
+php artisan route:list
 
-    See Available Pages:
-    Generated bash
+Look for /dashboard, /profile, /login, /register, etc.
+2. Try Signing Up:
 
-          
-    php artisan route:list
+    Go to /register and create an account
 
-        
+    Login at /login and ensure you're redirected to /dashboard
 
-    IGNORE_WHEN_COPYING_START
+3. Test Profile:
 
-    Use code with caution. Bash
-    IGNORE_WHEN_COPYING_END
+    Visit /profile to change name/email
 
-    Look for /dashboard, /profile, /login, and /register.
+    Try deleting your account
 
-    Try Signing Up:
+4. Design Check:
 
-        Go to /register to create an account.
+    Use browser dev tools to ensure styles load correctly
 
-        Log in at /login and check if you land on /dashboard.
-
-    Update Your Profile:
-
-        Visit /profile to change your name or email.
-
-        Try deleting your account to test the functionality.
-
-    Check the Design:
-
-        Open your browser’s developer tools (F12) to ensure the styles look good on different screen sizes.
-
-        Look for any errors in the console.
+    Check for errors in the console
 
 🔧 Extra Options
-Change Login Features
+Customize Fortify Features
 
-Breezify sets up all Fortify features in config/fortify.php. To turn some off, comment out any features you don’t want:
-Generated php
-
-      
-// config/fortify.php
+Edit config/fortify.php:
 
 'features' => [
     Features::registration(),
@@ -246,47 +168,39 @@ Generated php
     Features::twoFactorAuthentication(),
 ],
 
-    
-
-IGNORE_WHEN_COPYING_START
-Use code with caution. PHP
-IGNORE_WHEN_COPYING_END
+Comment out any feature you don’t need.
 Add More Features
 
-    New Pages: Add links in routes/auth.php.
+    New Pages: Add to routes/auth.php
 
-    Custom Code: Update app/Http/Controllers/ProfileController.php or add new files.
+    Controllers: Update app/Http/Controllers/ProfileController.php or create your own
 
-    Custom Designs: Change Blade files in resources/views/ or create new ones.
+    Blade Views: Modify or create new views in resources/views/
 
 🤝 How to Help
 
-Want to improve Breezify? We’d love your help! 😊
+Want to improve Breezify? We’d love your help!
 
-    Visit the GitHub repository.
+git checkout -b my-cool-feature
+git commit -m "Add my cool feature"
+git push origin my-cool-feature
 
-    Create a new branch: git checkout -b my-cool-feature
-
-    Save your changes: git commit -m 'Add my cool feature'
-
-    Share your work: git push origin my-cool-feature
-
-    Submit a Pull Request on GitHub.
-
+Then submit a Pull Request on GitHub.
 🐞 Need Help?
 
-If something’s not working, open an issue on GitHub with:
+Open a GitHub issue with:
 
-    A clear description of what’s wrong.
+    A clear description of the problem
 
-    Steps to recreate the problem.
+    Steps to reproduce
 
-    Your Laravel, PHP, and Breezify versions.
+    Laravel, PHP, and Breezify versions
 
-We’ll help you out quickly! 🙌
+We’ll help you out as soon as possible! 🙌
 📜 License
 
-Breezify is free to use under the MIT License. Feel free to use it in your projects!
+Breezify is open-source software licensed under the MIT License.
+You’re free to use it in personal or commercial projects.
 🙏 Thanks To
 
     Author: Renish Siwakoti
@@ -295,21 +209,12 @@ Breezify is free to use under the MIT License. Feel free to use it in your proje
 
     Inspired by: The amazing Laravel community
 
-<div align="center">
 🎉 Start Now!
 
 Ready to add a secure and stylish login system to your Laravel project?
-Generated bash
 
-      
 composer require codesren/breezify
 php artisan breezify:install blade
 
-    
-
-IGNORE_WHEN_COPYING_START
-Use code with caution. Bash
-IGNORE_WHEN_COPYING_END
-
 Happy coding! 😄
-</div>
+
