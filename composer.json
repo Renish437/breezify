@@ -3,6 +3,18 @@
     "description": "This is a combination of Laravel Breeze UI and Fortify as a backend authentication system",
     "type": "laravel-package",
     "license": "MIT",
+     "keywords": [
+        "laravel",
+        "breeze",
+        "fortify",
+        "authentication",
+        "laravel-auth",
+        "breezify",
+        "login",
+        "register",
+        "auth-ui",
+        "two-factor"
+    ],
     "autoload": {
         "psr-4": {
             "CodesRen\\Breezify\\": "src/"
