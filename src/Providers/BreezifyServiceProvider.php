@@ -18,8 +18,11 @@ class BreezifyServiceProvider extends ServiceProvider
             $this->commands([
                 InstallCommand::class,
             ]);
-
+                // Tell Laravel to load your package's migrations
+            $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
             $this->publishes([
+
+                 __DIR__.'/../../stubs/package.json' => base_path('package.json'),
 
                 // Provider
                 __DIR__.'/../../stubs/App/Providers/FortifyServiceProvider.php' => app_path('Providers/FortifyServiceProvider.php'),
