@@ -1,6 +1,6 @@
 🌟 Breezify
 
-A Laravel package that makes user authentication simple and beautiful.
+## A Laravel package that makes user authentication simple and beautiful.
 
 Breezify combines Laravel Fortify (for backend security) with Laravel Breeze (for beautiful UI using Blade and TailwindCSS).
 Get a complete login + profile management system up and running in minutes! 🚀
@@ -168,33 +168,30 @@ Make sure you see /login, /register, /dashboard, /profile, etc.
 
 Edit config/fortify.php to toggle features:
 
-'features' => [
+    'features' => [
     Features::registration(),
     Features::resetPasswords(),
     // Features::emailVerification(),
     Features::updateProfileInformation(),
     Features::updatePasswords(),
     Features::twoFactorAuthentication(),
-],
+    ],
 
 Comment out anything you don’t want.
 ➕ Extend It Further
 
-    Add new routes in routes/auth.php
-
-    Add custom controllers in app/Http/Controllers
-
-    Extend Fortify actions in app/Actions/Fortify/
-
-    Create additional views in resources/views
+Add new routes in routes/auth.php
+Add custom controllers in app/Http/Controllers
+Extend Fortify actions in app/Actions/Fortify/
+Create additional views in resources/views
 
 🤝 Contribute
 
 We welcome your ideas and improvements!
 
-git checkout -b feature/my-feature
-git commit -m "Add amazing feature"
-git push origin feature/my-feature
+    git checkout -b feature/my-feature
+    git commit -m "Add amazing feature"
+    git push origin feature/my-feature
 
 Then open a Pull Request on GitHub 🚀
 🐞 Need Support?
