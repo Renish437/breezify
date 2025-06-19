@@ -14,9 +14,9 @@
 
 2. Publish the Breezify Assets
 
-    php artisan vendor:publish --tag=breezify 
-    php artisan install:breezify blade
-    
+    php artisan vendor:publish --tag=breezify & php artisan install:breezify blade
+
+
 
 This will publish:
 
