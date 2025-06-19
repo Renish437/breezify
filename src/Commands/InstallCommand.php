@@ -5,6 +5,8 @@ namespace CodesRen\Breezify\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Symfony\Component\Process\Process;
 
 class InstallCommand extends Command
 {
@@ -13,157 +15,132 @@ class InstallCommand extends Command
 
     public function handle()
     {
-        $stack = $this->argument('stack');
-
-        if ($stack !== 'blade') {
+        if ($this->argument('stack') !== 'blade') {
             $this->error('Only the Blade stack is currently supported.');
             return 1;
         }
 
-        // Publish package resources
-        Artisan::call('vendor:publish', [
-            '--tag' => 'breezify',
-            '--force' => true,
-        ]);
+        // 1. Publish all package resources (views, controllers, routes, and the new FortifyServiceProvider stub)
+        Artisan::call('vendor:publish', ['--tag' => 'breezify', '--force' => true], $this->getOutput());
+        
+        // 2. Publish Fortify's own config and migration files
+        Artisan::call('vendor:publish', ['--provider' => 'Laravel\\Fortify\\FortifyServiceProvider', '--force' => true], $this->getOutput());
+        
+        // 3. Register the published FortifyServiceProvider in config/app.php
+        $this->registerFortifyServiceProvider();
 
-        // Publish Fortify configuration
-        Artisan::call('vendor:publish', [
-            '--provider' => 'Laravel\\Fortify\\FortifyServiceProvider',
-            '--force' => true,
-        ]);
-
-        // Enable Fortify features
+        // 4. Enable all features in the published config/fortify.php
         $this->enableFortifyFeatures();
 
-        // Append routes to web.php
-        $this->appendToWebRoutes();
+        // 5. Append dashboard/profile routes to routes/web.php
+        $this->appendRoutes();
 
-        // Install Blade stack
-        $this->installBladeStack();
+        // 6. Run database migrations
+        $this->info('Running database migrations...');
+        Artisan::call('migrate', [], $this->getOutput());
+        
+        // 7. Install and build Node dependencies
+        $this->installNodeDependencies();
 
-        // Run migrations
-        Artisan::call('migrate');
-
-        $this->info('Breezify installed successfully!');
+        $this->info('Breezify installed successfully! Please run "npm run dev" and visit your application.');
 
         return 0;
     }
 
-    protected function enableFortifyFeatures()
+    /**
+     * Registers the FortifyServiceProvider in the application's config.
+     */
+    protected function registerFortifyServiceProvider()
     {
-        $configPath = config_path('fortify.php');
+        $configFile = config_path('app.php');
+        $content = File::get($configFile);
 
-        if (!File::exists($configPath)) {
-            $this->error('Fortify configuration file not found at ' . $configPath . '. Ensure Laravel Fortify is installed.');
+        if (Str::contains($content, 'App\\Providers\\FortifyServiceProvider::class')) {
+            $this->line('FortifyServiceProvider already registered. Skipping.');
             return;
         }
 
-        // Define the desired Fortify features
-        $features = [
-            'Features::registration()',
-            'Features::resetPasswords()',
-            'Features::emailVerification()',
-            'Features::updateProfileInformation()',
-            'Features::updatePasswords()',
-            'Features::twoFactorAuthentication()',
-        ];
+        $this->info('Registering FortifyServiceProvider...');
+        File::put($configFile, str_replace(
+            "App\\Providers\\RouteServiceProvider::class,",
+            "App\\Providers\\RouteServiceProvider::class,".PHP_EOL."        App\\Providers\\FortifyServiceProvider::class,",
+            $content
+        ));
+    }
 
-        // Load the existing config as a PHP array
-        $config = require $configPath;
+    /**
+     * Replaces the 'features' array in the fortify.php config file.
+     */
+    protected function enableFortifyFeatures()
+    {
+        $this->info('Configuring Fortify features...');
+        $configPath = config_path('fortify.php');
 
-        // Update the features array
-        $config['features'] = array_map(function ($feature) {
-            return substr($feature, 0, -2); // Remove '()' for eval
-        }, $features);
+        if (!File::exists($configPath)) {
+            $this->error('Fortify configuration file not found.');
+            return;
+        }
 
-        // Generate the new config content
-        $newConfigContent = "<?php\n\nuse Laravel\\Fortify\\Features;\n\nreturn " . $this->arrayToPhp($config) . ";\n";
+        $features = <<<PHP
+'features' => [
+        Features::registration(),
+        Features::resetPasswords(),
+        Features::emailVerification(),
+        Features::updateProfileInformation(),
+        Features::updatePasswords(),
+        Features::twoFactorAuthentication([
+            'confirmPassword' => true,
+        ]),
+    ],
+PHP;
 
-        // Write the updated config file
-        if (File::put($configPath, $newConfigContent)) {
-            $this->info('Enabled Fortify features in config/fortify.php');
+        $content = File::get($configPath);
+        $content = preg_replace("/'features' => \[.*?],/s", $features, $content, 1);
+        File::put($configPath, $content);
+    }
+    
+    /**
+     * Appends required routes to the application's web routes file.
+     */
+    protected function appendRoutes()
+    {
+        $this->info('Adding dashboard and profile routes...');
+        $routesContent = File::get(__DIR__.'/../../stubs/routes/web.php');
+        
+        if (!Str::contains(File::get(base_path('routes/web.php')), 'ProfileController')) {
+            File::append(base_path('routes/web.php'), $routesContent);
         } else {
-            $this->error('Failed to write to config/fortify.php. Please manually add:');
-            $this->line("'features' => [\n        " . implode(",\n        ", $features) . "\n    ]");
+            $this->line('Dashboard/Profile routes already exist. Skipping.');
         }
     }
 
     /**
-     * Convert a PHP array to a formatted PHP string.
-     *
-     * @param array $array
-     * @param int $level
-     * @return string
+     * Installs and builds the frontend assets.
      */
-    protected function arrayToPhp($array, $level = 0)
+    protected function installNodeDependencies()
     {
-        $indent = str_repeat('    ', $level);
-        $lines = [];
+        $this->info('Installing and building Node dependencies...');
 
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $lines[] = $indent . "'" . addslashes($key) . "' => [\n" . $this->arrayToPhp($value, $level + 1) . $indent . "],";
-            } elseif (is_string($value) && strpos($value, 'Features::') === 0) {
-                $lines[] = $indent . "'" . addslashes($key) . "' => $value,";
-            } else {
-                $lines[] = $indent . "'" . addslashes($key) . "' => " . var_export($value, true) . ",";
-            }
-        }
-
-        return implode("\n", $lines);
-    }
-
-    protected function appendToWebRoutes()
-    {
-        $webRoutesPath = base_path('routes/web.php');
-        $packageRoutesPath = __DIR__.'/../../routes/web.php';
-
-        if (!File::exists($packageRoutesPath)) {
-            $this->error('Package routes file not found at ' . $packageRoutesPath);
-            return;
-        }
-
-        $packageRoutes = File::get($packageRoutesPath);
-
-        // Check if routes are already appended
-        if (File::exists($webRoutesPath) && !str_contains(File::get($webRoutesPath), $packageRoutes)) {
-            File::append($webRoutesPath, "\n" . $packageRoutes);
-            $this->info('Appended Breezify routes to routes/web.php');
+        if (File::exists(base_path('pnpm-lock.yaml'))) {
+            $this->runProcess(['pnpm', 'install']);
+            $this->runProcess(['pnpm', 'run', 'build']);
+        } elseif (File::exists(base_path('yarn.lock'))) {
+            $this->runProcess(['yarn', 'install']);
+            $this->runProcess(['yarn', 'run', 'build']);
         } else {
-            $this->info('Breezify routes already included in routes/web.php');
+            $this->runProcess(['npm', 'install']);
+            $this->runProcess(['npm', 'run', 'build']);
         }
     }
 
-    protected function installBladeStack()
+    /**
+     * Runs a command process and displays its output.
+     */
+    protected function runProcess(array $command)
     {
-        $this->info('Installing npm dependencies...');
-
-        // Run npm install and capture output
-        $output = [];
-        $returnCode = null;
-        exec('npm install 2>&1', $output, $returnCode);
-
-        if ($returnCode !== 0) {
-            $this->error('Failed to install npm dependencies. Output:');
-            $this->line(implode("\n", $output));
-            $this->info('Please run "npm install" manually in your project directory.');
-            return;
-        }
-
-        $this->info('Compiling assets...');
-
-        // Run npm run build and capture output
-        $output = [];
-        $returnCode = null;
-        exec('npm run build 2>&1', $output, $returnCode);
-
-        if ($returnCode !== 0) {
-            $this->error('Failed to compile assets. Output:');
-            $this->line(implode("\n", $output));
-            $this->info('Please run "npm run build" manually in your project directory.');
-            return;
-        }
-
-        $this->info('Blade stack installed. Breezify UI is ready!');
+        $process = new Process($command, base_path());
+        $process->setTimeout(null)->run(function ($type, $buffer) {
+            $this->getOutput()->write($buffer);
+        });
     }
 }
