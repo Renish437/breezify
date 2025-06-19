@@ -8,6 +8,7 @@ use CodesRen\Breezify\Actions\Fortify\CreateNewUser;
 use CodesRen\Breezify\Actions\Fortify\ResetUserPassword;
 use CodesRen\Breezify\Actions\Fortify\UpdateUserPassword;
 use CodesRen\Breezify\Actions\Fortify\UpdateUserProfileInformation;
+use CodesRen\Breezify\Commands\InstallCommand;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -46,7 +47,7 @@ class BreezifyServiceProvider extends ServiceProvider
         // Register Artisan command
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \CodesRen\Breezify\Commands\InstallCommand::class,
+                InstallCommand::class,
             ]);
         }
     }
