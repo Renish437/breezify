@@ -34,7 +34,7 @@ This will publish:
 
     JS / CSS scaffolding
 
-3. Register the Fortify Service Provider
+### 3. Register the Fortify Service Provider
 
 Ensure the following is added to config/app.php:
 
@@ -47,7 +47,7 @@ In config/fortify.php:
 
     'views' => true,
 
-Enable Features
+### 4. Enable Features in config/fortify.php
 
     'features' => [
         Features::registration(),
@@ -60,7 +60,7 @@ Enable Features
         ]),
     ],
         
-In make sure to have these View in Providers/FortifyServiceProvider.php   
+### 5. In make sure to have these View in Providers/FortifyServiceProvider.php   
         
         # Register view
         Fortify::registerView(function () {
@@ -103,7 +103,7 @@ Make sure to include the published route file in routes/web.php:
 
 🧑‍💻 User Model Setup
 
-Ensure your User model uses necessary traits and interfaces:
+### 6. Ensure your User model uses necessary traits and interfaces:
 
     use Laravel\Fortify\TwoFactorAuthenticatable;
     use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -134,7 +134,7 @@ After publishing:
 
     Ensure you have Node.js, npm, and Vite configured.
 
-🧪 Run Migrations
+### 7. 🧪 Run Migrations
 
     php artisan migrate
 
