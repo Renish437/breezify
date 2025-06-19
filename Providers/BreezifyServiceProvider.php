@@ -20,6 +20,7 @@ class BreezifyServiceProvider extends ServiceProvider
             ]);
 
             $this->publishes([
+
                 // Provider
                 __DIR__.'/../../stubs/App/Providers/FortifyServiceProvider.php' => app_path('Providers/FortifyServiceProvider.php'),
                 
