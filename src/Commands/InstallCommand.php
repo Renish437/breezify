@@ -35,7 +35,7 @@ class InstallCommand extends Command
         // Enable Fortify features
         $this->enableFortifyFeatures();
 
-        // Append route include to web.php
+        // Append routes to web.php
         $this->appendToWebRoutes();
 
         // Install Blade stack
@@ -54,7 +54,7 @@ class InstallCommand extends Command
         $configPath = config_path('fortify.php');
 
         if (!File::exists($configPath)) {
-            $this->error('Fortify configuration file not found at ' . $configPath);
+            $this->error('Fortify configuration file not found at ' . $configPath . '. Ensure Laravel Fortify is installed.');
             return;
         }
 
@@ -68,53 +68,76 @@ class InstallCommand extends Command
             'Features::twoFactorAuthentication()',
         ];
 
-        // Read the existing config file
-        $configContent = File::get($configPath);
+        // Load the existing config as a PHP array
+        $config = require $configPath;
 
-        // Format the features array with proper indentation
-        $featuresString = "[\n";
-        foreach ($features as $index => $feature) {
-            $featuresString .= "        $feature" . ($index < count($features) - 1 ? "," : "") . "\n";
-        }
-        $featuresString .= "    ]";
+        // Update the features array
+        $config['features'] = array_map(function ($feature) {
+            return substr($feature, 0, -2); // Remove '()' for eval
+        }, $features);
 
-        // Replace the 'features' array in the config
-        $newConfigContent = preg_replace(
-            "/'features' => \[[^\]]*?\],/",
-            "'features' => $featuresString,",
-            $configContent
-        );
-
-        // If no replacement was made, inform the user
-        if ($newConfigContent === $configContent) {
-            $this->warn('Could not update Fortify features in config/fortify.php. Please manually add:');
-            $this->line("'features' => $featuresString");
-            return;
-        }
+        // Generate the new config content
+        $newConfigContent = "<?php\n\nuse Laravel\\Fortify\\Features;\n\nreturn " . $this->arrayToPhp($config) . ";\n";
 
         // Write the updated config file
-        File::put($configPath, $newConfigContent);
-        $this->info('Enabled Fortify features in config/fortify.php');
+        if (File::put($configPath, $newConfigContent)) {
+            $this->info('Enabled Fortify features in config/fortify.php');
+        } else {
+            $this->error('Failed to write to config/fortify.php. Please manually add:');
+            $this->line("'features' => [\n        " . implode(",\n        ", $features) . "\n    ]");
+        }
+    }
+
+    /**
+     * Convert a PHP array to a formatted PHP string.
+     *
+     * @param array $array
+     * @param int $level
+     * @return string
+     */
+    protected function arrayToPhp($array, $level = 0)
+    {
+        $indent = str_repeat('    ', $level);
+        $lines = [];
+
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $lines[] = $indent . "'" . addslashes($key) . "' => [\n" . $this->arrayToPhp($value, $level + 1) . $indent . "],";
+            } elseif (is_string($value) && strpos($value, 'Features::') === 0) {
+                $lines[] = $indent . "'" . addslashes($key) . "' => $value,";
+            } else {
+                $lines[] = $indent . "'" . addslashes($key) . "' => " . var_export($value, true) . ",";
+            }
+        }
+
+        return implode("\n", $lines);
     }
 
     protected function appendToWebRoutes()
     {
         $webRoutesPath = base_path('routes/web.php');
-        $routeInclude = "\nrequire __DIR__.'/auth.php';\n";
+        $packageRoutesPath = __DIR__.'/../../routes/web.php';
 
-        // Check if the include statement already exists
-        if (File::exists($webRoutesPath) && !str_contains(File::get($webRoutesPath), "require __DIR__.'/auth.php';")) {
-            File::append($webRoutesPath, $routeInclude);
-            $this->info('Added auth routes to routes/web.php');
+        if (!File::exists($packageRoutesPath)) {
+            $this->error('Package routes file not found at ' . $packageRoutesPath);
+            return;
+        }
+
+        $packageRoutes = File::get($packageRoutesPath);
+
+        // Check if routes are already appended
+        if (File::exists($webRoutesPath) && !str_contains(File::get($webRoutesPath), $packageRoutes)) {
+            File::append($webRoutesPath, "\n" . $packageRoutes);
+            $this->info('Appended Breezify routes to routes/web.php');
         } else {
-            $this->info('Auth routes already included in routes/web.php');
+            $this->info('Breezify routes already included in routes/web.php');
         }
     }
 
     protected function installBladeStack()
     {
         $this->info('Installing npm dependencies...');
-        
+
         // Run npm install and capture output
         $output = [];
         $returnCode = null;
@@ -128,7 +151,7 @@ class InstallCommand extends Command
         }
 
         $this->info('Compiling assets...');
-        
+
         // Run npm run build and capture output
         $output = [];
         $returnCode = null;
