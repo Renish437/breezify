@@ -52,26 +52,49 @@ class InstallCommand extends Command
     protected function enableFortifyFeatures()
     {
         $configPath = config_path('fortify.php');
-        if (File::exists($configPath)) {
-            $config = File::get($configPath);
-            // Enable features like profile updates and account deletion
-            $features = [
-                'Features::registration()',
-                'Features::resetPasswords()',
-                'Features::emailVerification()',
-                'Features::updateProfileInformation()',
-                'Features::updatePasswords()',
-                'Features::twoFactorAuthentication()',
-            ];
-            $featuresString = '[' . implode(', ', $features) . ']';
-            $config = preg_replace(
-                "/'features' => \[[^\]]*\]/",
-                "'features' => $featuresString",
-                $config
-            );
-            File::put($configPath, $config);
-            $this->info('Enabled Fortify features in config/fortify.php');
+
+        if (!File::exists($configPath)) {
+            $this->error('Fortify configuration file not found at ' . $configPath);
+            return;
         }
+
+        // Define the desired Fortify features
+        $features = [
+            'Features::registration()',
+            'Features::resetPasswords()',
+            'Features::emailVerification()',
+            'Features::updateProfileInformation()',
+            'Features::updatePasswords()',
+            'Features::twoFactorAuthentication()',
+        ];
+
+        // Read the existing config file
+        $configContent = File::get($configPath);
+
+        // Format the features array with proper indentation
+        $featuresString = "[\n";
+        foreach ($features as $index => $feature) {
+            $featuresString .= "        $feature" . ($index < count($features) - 1 ? "," : "") . "\n";
+        }
+        $featuresString .= "    ]";
+
+        // Replace the 'features' array in the config
+        $newConfigContent = preg_replace(
+            "/'features' => \[[^\]]*?\],/",
+            "'features' => $featuresString,",
+            $configContent
+        );
+
+        // If no replacement was made, inform the user
+        if ($newConfigContent === $configContent) {
+            $this->warn('Could not update Fortify features in config/fortify.php. Please manually add:');
+            $this->line("'features' => $featuresString");
+            return;
+        }
+
+        // Write the updated config file
+        File::put($configPath, $newConfigContent);
+        $this->info('Enabled Fortify features in config/fortify.php');
     }
 
     protected function appendToWebRoutes()
@@ -90,8 +113,34 @@ class InstallCommand extends Command
 
     protected function installBladeStack()
     {
-        $this->info('Installing npm dependencies and compiling assets...');
-        exec('npm install && npm run build');
+        $this->info('Installing npm dependencies...');
+        
+        // Run npm install and capture output
+        $output = [];
+        $returnCode = null;
+        exec('npm install 2>&1', $output, $returnCode);
+
+        if ($returnCode !== 0) {
+            $this->error('Failed to install npm dependencies. Output:');
+            $this->line(implode("\n", $output));
+            $this->info('Please run "npm install" manually in your project directory.');
+            return;
+        }
+
+        $this->info('Compiling assets...');
+        
+        // Run npm run build and capture output
+        $output = [];
+        $returnCode = null;
+        exec('npm run build 2>&1', $output, $returnCode);
+
+        if ($returnCode !== 0) {
+            $this->error('Failed to compile assets. Output:');
+            $this->line(implode("\n", $output));
+            $this->info('Please run "npm run build" manually in your project directory.');
+            return;
+        }
+
         $this->info('Blade stack installed. Breezify UI is ready!');
     }
 }
