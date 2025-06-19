@@ -16,10 +16,10 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^8.0",
+        "php": "^8.2",
         "laravel/fortify": "^1.0",
-        "laravel/breeze": "^1.0",
-        "illuminate/support": "^9.0|^10.0|^11.0"
+        "laravel/breeze": "^1.0"
+      
     },
     "extra": {
         "laravel": {
