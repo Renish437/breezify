@@ -17,23 +17,6 @@
     php artisan vendor:publish --tag=breezify & php artisan install:breezify blade
 
 
-
-This will publish:
-
-    Views (resources/views/auth)
-
-    Controllers
-
-    Layouts (AppLayout, GuestLayout)
-
-    Routes (routes/auth.php)
-
-    Tailwind / Vite configs
-
-    FortifyServiceProvider
-
-    JS / CSS scaffolding
-
 ### 3. Register the Fortify Service Provider
 
 Ensure the following is added to config/app.php:
