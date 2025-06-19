@@ -10,9 +10,25 @@ use Symfony\Component\Process\Process;
 
 class InstallCommand extends Command
 {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
     protected $signature = 'breezify:install {stack=blade : The frontend stack (blade)}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
     protected $description = 'Install the Breezify package scaffolding';
 
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
     public function handle()
     {
         if ($this->argument('stack') !== 'blade') {
@@ -20,29 +36,34 @@ class InstallCommand extends Command
             return 1;
         }
 
-        // 1. Publish all package resources (views, controllers, routes, and the new FortifyServiceProvider stub)
-        Artisan::call('vendor:publish', ['--tag' => 'breezify', '--force' => true], $this->getOutput());
+        // 1. Publish all package resources first
+        $this->info('Publishing Breezify resources (views, configs, controllers)...');
+        Artisan::call('vendor:publish', ['--provider' => 'CodesRen\\Breezify\\Providers\\BreezifyServiceProvider', '--tag' => 'breezify', '--force' => true], $this->getOutput());
         
-        // 2. Publish Fortify's own config and migration files
+        $this->info('Publishing Fortify resources...');
         Artisan::call('vendor:publish', ['--provider' => 'Laravel\\Fortify\\FortifyServiceProvider', '--force' => true], $this->getOutput());
         
-        // 3. Register the published FortifyServiceProvider in config/app.php
+        // 2. Update configs and routes
         $this->registerFortifyServiceProvider();
-
-        // 4. Enable all features in the published config/fortify.php
         $this->enableFortifyFeatures();
-
-        // 5. Append dashboard/profile routes to routes/web.php
         $this->appendRoutes();
+        $this->updateGitignore();
 
-        // 6. Run database migrations
+        // 3. Install Node dependencies (This MUST happen before building)
+        $this->info('Installing Node dependencies...');
+        $this->runProcess($this->npmCommand().' install');
+
+        // 4. Run database migrations
         $this->info('Running database migrations...');
         Artisan::call('migrate', [], $this->getOutput());
         
-        // 7. Install and build Node dependencies
-        $this->installNodeDependencies();
+        // 5. Build assets (This MUST happen last)
+        $this->info('Compiling frontend assets...');
+        $this->runProcess($this->npmCommand().' run build');
 
-        $this->info('Breezify installed successfully! Please run "npm run dev" and visit your application.');
+        $this->line('');
+        $this->info('Breezify installed successfully!');
+        $this->comment('Please run "npm run dev" to start the Vite development server.');
 
         return 0;
     }
@@ -81,8 +102,9 @@ class InstallCommand extends Command
             return;
         }
 
-        $features = <<<PHP
-'features' => [
+        // Use a more robust string replacement that is less prone to formatting errors
+        $fortifyConfig = file_get_contents($configPath);
+        $featuresReplacement = "'features' => [
         Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
@@ -91,56 +113,74 @@ class InstallCommand extends Command
         Features::twoFactorAuthentication([
             'confirmPassword' => true,
         ]),
-    ],
-PHP;
+    ],";
 
-        $content = File::get($configPath);
-        $content = preg_replace("/'features' => \[.*?],/s", $features, $content, 1);
-        File::put($configPath, $content);
+        $fortifyConfig = preg_replace("/'features' => \[.*?],/s", $featuresReplacement, $fortifyConfig, 1);
+        file_put_contents($configPath, $fortifyConfig);
     }
     
     /**
      * Appends required routes to the application's web routes file.
      */
-  protected function appendRoutes()
-{
-    $this->info('Adding auth routes...');
-    $authRoutes = "require __DIR__.'/auth.php';";
-    
-    if (!Str::contains(File::get(base_path('routes/web.php')), $authRoutes)) {
-        File::append(base_path('routes/web.php'), "\n".$authRoutes);
-    } else {
-        $this->line('Auth routes already included. Skipping.');
-    }
-}
-
-    /**
-     * Installs and builds the frontend assets.
-     */
-    protected function installNodeDependencies()
+    protected function appendRoutes()
     {
-        $this->info('Installing and building Node dependencies...');
-
-        if (File::exists(base_path('pnpm-lock.yaml'))) {
-            $this->runProcess(['pnpm', 'install']);
-            $this->runProcess(['pnpm', 'run', 'build']);
-        } elseif (File::exists(base_path('yarn.lock'))) {
-            $this->runProcess(['yarn', 'install']);
-            $this->runProcess(['yarn', 'run', 'build']);
+        $this->info('Adding auth routes...');
+        $authRoutes = "require __DIR__.'/auth.php';";
+        
+        if (!Str::contains(File::get(base_path('routes/web.php')), $authRoutes)) {
+            File::append(base_path('routes/web.php'), "\n".$authRoutes);
         } else {
-            $this->runProcess(['npm', 'install']);
-            $this->runProcess(['npm', 'run', 'build']);
+            $this->line('Auth routes already included. Skipping.');
         }
     }
 
     /**
-     * Runs a command process and displays its output.
+     * Determines which NPM client to use.
+     *
+     * @return string
      */
-    protected function runProcess(array $command)
+    protected function npmCommand(): string
     {
-        $process = new Process($command, base_path());
-        $process->setTimeout(null)->run(function ($type, $buffer) {
+        if (file_exists(base_path('pnpm-lock.yaml'))) {
+            return 'pnpm';
+        }
+        if (file_exists(base_path('yarn.lock'))) {
+            return 'yarn';
+        }
+        return 'npm';
+    }
+
+    /**
+     * Runs a command process from a string.
+     *
+     * @param string $command
+     * @return void
+     */
+    protected function runProcess(string $command)
+    {
+        $process = Process::fromShellCommandline($command, base_path(), null, null, null);
+        
+        $process->run(function ($type, $buffer) {
             $this->getOutput()->write($buffer);
         });
+    }
+
+    /**
+     * Update the .gitignore file.
+     *
+     * @return void
+     */
+    protected function updateGitignore()
+    {
+        $gitignorePath = base_path('.gitignore');
+        if (!file_exists($gitignorePath)) {
+            return;
+        }
+
+        $content = file_get_contents($gitignorePath);
+
+        if (!Str::contains($content, '/public/build')) {
+            file_put_contents($gitignorePath, $content.PHP_EOL.'/public/build'.PHP_EOL);
+        }
     }
 }
